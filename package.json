@@ -1,0 +1,19 @@
+{
+  "name": "msk-iam-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.241.0",
+    "@jm18457/kafkajs-msk-iam-authentication-mechanism": "^2.0.3",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "kafkajs": "^2.2.3"
+  }
+}
