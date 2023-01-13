@@ -1,7 +1,10 @@
 require('dotenv').config();
 
 const { Kafka } = require('kafkajs');
-const { KafkaConfig } = require('./kafka.config');
+const { topics, KafkaConfig } = require('./kafka.config');
+
+const numPartitions = 5;
+const replicationFactor = 1; // can-not be more than number of brokers
 
 // // Use this code snippet in your app.
 // // If you need more information about configurations or implementing the sample code, visit the AWS docs:
@@ -39,39 +42,24 @@ const createTopic = async () => {
     // console.log({ response, secret });
 
     const kafka = new Kafka(KafkaConfig);
-
     const admin = kafka.admin();
 
     console.log('Connecting.....');
     await admin.connect();
     console.log('Connected!');
 
-    const numPartitions = 2;
-    const replicationFactor = 1;
+    const topicConfig = topics.map((topic) => {
+      return {
+        topic,
+        numPartitions, // default: -1 (uses broker `num.partitions` configuration)
+        replicationFactor, // default: -1 (uses broker `default.replication.factor` configuration)
+        // replicaAssignment: <Array>,  // Example: [{ partition: 0, replicas: [0,1,2] }] - default: []
+        // configEntries: <Array>       // Example: [{ name: 'cleanup.policy', value: 'compact' }] - default: []
+      };
+    });
 
     await admin.createTopics({
-      topics: [
-        {
-          topic: 'topic-a',
-          numPartitions,
-          replicationFactor,
-        },
-        {
-          topic: 'topic-b',
-          numPartitions,
-          replicationFactor,
-        },
-        {
-          topic: 'topic-c',
-          numPartitions,
-          replicationFactor,
-        },
-        {
-          topic: 'topic-d',
-          numPartitions,
-          replicationFactor,
-        },
-      ],
+      topics: topicConfig,
       waitForLeaders: true,
     });
 
@@ -86,4 +74,4 @@ const createTopic = async () => {
 
 createTopic();
 
-// module.exports = createTopic;
+module.exports = { createTopic };

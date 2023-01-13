@@ -2,6 +2,7 @@ const { logLevel } = require('kafkajs');
 
 // https://stackoverflow.com/questions/67951120/create-aws-amazon-msk-javascript-client-connection
 const { NODE_ENV, KAFKA_PORT, KAFKA_CLIENT_ID, KAFKA_BROKERS } = process.env;
+const topics = ['topic-a', 'topic-b', 'topic-c', 'topic-d', 'topic-e'];
 
 const KafkaConfig = {
   clientId: KAFKA_CLIENT_ID,
@@ -28,4 +29,4 @@ if (NODE_ENV !== 'dev') {
   // };
 }
 
-module.exports = { KafkaConfig };
+module.exports = { topics, KafkaConfig };

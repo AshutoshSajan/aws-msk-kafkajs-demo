@@ -1,33 +1,36 @@
 require('dotenv').config();
 
 const { Kafka } = require('kafkajs');
-const { KafkaConfig } = require('./kafka.config');
+const { topics, KafkaConfig } = require('./kafka.config');
 
-// const topics = ['topic-a', 'topic-b'];
 const groupId = 'group-1';
 
-async function consumer() {
+const connectConsumerAndSubscribe = async () => {
+  const kafka = new Kafka(KafkaConfig);
+
+  const consumer = kafka.consumer({
+    groupId,
+    minBytes: 5,
+    maxBytes: 1e6,
+    maxWaitTimeInMs: 0,
+  });
+
+  console.log('Connecting.....');
+  await consumer.connect();
+
+  await consumer.subscribe({
+    topics,
+    fromBeginning: true,
+  });
+
+  console.log('Connected!');
+  return consumer;
+};
+
+async function readMessages(consumer) {
   try {
-    const kafka = new Kafka(KafkaConfig);
-
-    const consumer = kafka.consumer({
-      groupId,
-      minBytes: 5,
-      maxBytes: 1e6,
-      maxWaitTimeInMs: 0,
-    });
-
-    console.log('Connecting.....');
-    await consumer.connect();
-    console.log('Connected!');
-
-    await consumer.subscribe({
-      topic: 'topic-a',
-      fromBeginning: true,
-    });
-
     await consumer.run({
-      partitionsConsumedConcurrently: 2, // Default: 1
+      partitionsConsumedConcurrently: 5, // Default: 1
       eachMessage: async ({ topic, partition, message, heartbeat, pause }) => {
         console.log({
           topic,
@@ -37,6 +40,8 @@ async function consumer() {
           // heartbeat,
           // pause,
         });
+
+        await heartbeat();
       },
 
       // ==========================================
@@ -76,6 +81,8 @@ async function consumer() {
       //   }
       // },
     });
+
+    console.log('message read successfully');
   } catch (err) {
     console.error('Something bad happened', err);
   } finally {
@@ -83,6 +90,11 @@ async function consumer() {
   }
 }
 
-consumer();
+const main = async () => {
+  const consumer = await connectConsumerAndSubscribe();
+  await readMessages(consumer);
+};
 
-// module.exports = consumer;
+main();
+
+module.exports = readMessages;
